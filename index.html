@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>계산기 · 기본 &amp; FE Calc</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app">
+    <header class="header">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">∑</span>
+        <div>
+          <h1>계산기</h1>
+          <p class="tagline">기본 사칙연산 · 금융공학(옵션·채권·NPV·선도)</p>
+        </div>
+      </div>
+      <div class="header-meta">
+        <span class="pill">로컬 전용</span>
+        <span class="pill muted">입력값 서버 미전송</span>
+      </div>
+    </header>
+
+    <nav class="tabs" role="tablist" aria-label="계산기 종류">
+      <button type="button" class="tab active" role="tab" aria-selected="true" data-tab="basic">기본</button>
+      <button type="button" class="tab" role="tab" aria-selected="false" data-tab="bsm">Black-Scholes</button>
+      <button type="button" class="tab" role="tab" aria-selected="false" data-tab="bond">채권</button>
+      <button type="button" class="tab" role="tab" aria-selected="false" data-tab="dcf">NPV / IRR</button>
+      <button type="button" class="tab" role="tab" aria-selected="false" data-tab="fwd">선물·선도</button>
+    </nav>
+
+    <main class="panels">
+      <!-- Basic calculator -->
+      <section id="panel-basic" class="panel active" role="tabpanel" aria-label="기본 계산기">
+        <div class="calc-shell">
+          <div id="calc-display" class="calc-display" aria-live="polite" tabindex="0">0</div>
+          <div class="calc-keys" role="group" aria-label="키패드">
+            <button type="button" class="calc-key fn" data-action="clear">AC</button>
+            <button type="button" class="calc-key fn" data-action="sign">±</button>
+            <button type="button" class="calc-key fn" data-action="percent">%</button>
+            <button type="button" class="calc-key op" data-action="op" data-op="/">÷</button>
+            <button type="button" class="calc-key" data-action="digit" data-digit="7">7</button>
+            <button type="button" class="calc-key" data-action="digit" data-digit="8">8</button>
+            <button type="button" class="calc-key" data-action="digit" data-digit="9">9</button>
+            <button type="button" class="calc-key op" data-action="op" data-op="*">×</button>
+            <button type="button" class="calc-key" data-action="digit" data-digit="4">4</button>
+            <button type="button" class="calc-key" data-action="digit" data-digit="5">5</button>
+            <button type="button" class="calc-key" data-action="digit" data-digit="6">6</button>
+            <button type="button" class="calc-key op" data-action="op" data-op="-">−</button>
+            <button type="button" class="calc-key" data-action="digit" data-digit="1">1</button>
+            <button type="button" class="calc-key" data-action="digit" data-digit="2">2</button>
+            <button type="button" class="calc-key" data-action="digit" data-digit="3">3</button>
+            <button type="button" class="calc-key op" data-action="op" data-op="+">+</button>
+            <button type="button" class="calc-key wide" data-action="digit" data-digit="0">0</button>
+            <button type="button" class="calc-key" data-action="dot">.</button>
+            <button type="button" class="calc-key op equals" data-action="equals">=</button>
+          </div>
+        </div>
+        <p class="footnote">키보드: 숫자·연산자·Enter(=)·Escape(AC)·Backspace(한 자리 삭제)</p>
+      </section>
+
+      <!-- Black-Scholes -->
+      <section id="panel-bsm" class="panel" role="tabpanel" hidden>
+        <div class="grid two">
+          <div class="card">
+            <h2>입력</h2>
+            <form id="form-bsm" class="form">
+              <label>현물가 S <input name="S" type="number" step="any" value="100" /></label>
+              <label>행사가 K <input name="K" type="number" step="any" value="100" /></label>
+              <label>만기 T (년) <input name="T" type="number" step="any" value="1" /></label>
+              <label>무위험이자율 r (연, 소수) <input name="r" type="number" step="any" value="0.05" /></label>
+              <label>배당수익률 q (연, 소수) <input name="q" type="number" step="any" value="0" /></label>
+              <label>변동성 σ (연, 소수) <input name="sigma" type="number" step="any" value="0.25" /></label>
+              <fieldset class="inline">
+                <legend>옵션 유형</legend>
+                <label><input type="radio" name="otype" value="call" checked /> 콜</label>
+                <label><input type="radio" name="otype" value="put" /> 풋</label>
+              </fieldset>
+              <button type="submit" class="btn primary">계산</button>
+            </form>
+          </div>
+          <div class="card">
+            <h2>결과</h2>
+            <div id="out-bsm" class="results empty">입력 후 계산을 누르세요.</div>
+          </div>
+        </div>
+        <p class="footnote">연속배당·연속복리 가정의 Black-Scholes-Merton. 그릭스는 표준 정의.</p>
+      </section>
+
+      <!-- Bond -->
+      <section id="panel-bond" class="panel" role="tabpanel" hidden>
+        <div class="grid two">
+          <div class="card">
+            <h2>입력</h2>
+            <form id="form-bond" class="form">
+              <label>액면 F <input name="F" type="number" step="any" value="100" /></label>
+              <label>표면금리 c (연, 소수) <input name="c" type="number" step="any" value="0.06" /></label>
+              <label>만기 잔존기간 n (년, 연 1회 이자) <input name="n" type="number" step="any" value="5" /></label>
+              <label>할인율 y (연, 소수) — 가격 계산 시 사용 <input name="y" type="number" step="any" value="0.05" /></label>
+              <label class="full">또는 시장가 P로 YTM 역산 <input name="P" type="number" step="any" placeholder="비우면 y로만 가격" /></label>
+              <button type="submit" class="btn primary">계산</button>
+            </form>
+          </div>
+          <div class="card">
+            <h2>결과</h2>
+            <div id="out-bond" class="results empty">입력 후 계산을 누르세요.</div>
+          </div>
+        </div>
+        <p class="footnote">고정쿠폰·연 1회 지급·액면상환 부채. YTM은 Newton-Raphson.</p>
+      </section>
+
+      <!-- NPV IRR -->
+      <section id="panel-dcf" class="panel" role="tabpanel" hidden>
+        <div class="grid two">
+          <div class="card">
+            <h2>입력</h2>
+            <form id="form-dcf" class="form">
+              <label>할인율 (연, 소수) — NPV용 <input name="rate" type="number" step="any" value="0.1" /></label>
+              <label class="full">현금흐름 (쉼표 구분, 0기부터) <textarea name="cfs" rows="4">-1000, 300, 350, 400, 450</textarea></label>
+              <button type="submit" class="btn primary">계산</button>
+            </form>
+          </div>
+          <div class="card">
+            <h2>결과</h2>
+            <div id="out-dcf" class="results empty">입력 후 계산을 누르세요.</div>
+          </div>
+        </div>
+        <p class="footnote">IRR은 bisection (내부수익률). 다중 IRR 가능 시 하나만 표시.</p>
+      </section>
+
+      <!-- Forward -->
+      <section id="panel-fwd" class="panel" role="tabpanel" hidden>
+        <div class="grid two">
+          <div class="card">
+            <h2>입력</h2>
+            <form id="form-fwd" class="form">
+              <label>현물 S₀ <input name="S0" type="number" step="any" value="100" /></label>
+              <label>만기 T (년) <input name="T" type="number" step="any" value="0.5" /></label>
+              <label>무위험이자율 r (연) <input name="r" type="number" step="any" value="0.04" /></label>
+              <label>보유비용·편의수익률 b (연, 저장·배당 등 순비용) <input name="b" type="number" step="any" value="0.01" /></label>
+              <button type="submit" class="btn primary">선도가 계산</button>
+            </form>
+          </div>
+          <div class="card">
+            <h2>결과</h2>
+            <div id="out-fwd" class="results empty">입력 후 계산을 누르세요.</div>
+          </div>
+        </div>
+        <p class="footnote">연속복리 선도: F₀ = S₀ e^{(r−b)T}. b&gt;r이면 선도가 현물보다 낮을 수 있음.</p>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <span>교육·검증용 모델입니다. 실제 거래·공시 전 전문 검증이 필요합니다.</span>
+    </footer>
+  </div>
+  <script src="finance.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
